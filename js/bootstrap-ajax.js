@@ -117,6 +117,52 @@
     $this.closest(selector).remove()
   }
   
+  Ajax.prototype.refresh = function () {
+
+    var $this = $(this)
+      , url = $this.attr('data-refresh-url')
+      , method = $this.attr('data-method')
+
+    if (!method) {
+      method = 'get'
+    }
+    
+    spin($this)
+    
+    $.ajax({
+      url: url,
+      type: method,
+      dataType: 'json',
+      statusCode: {
+        200: function(data) {
+          processData(data, $this)
+        },
+        500: function() {
+          $this.trigger('bootstrap-ajax:error', [$this, 500])
+        },
+        404: function() {
+          $this.trigger('bootstrap-ajax:error', [$this, 404])
+        }
+      }
+    })
+
+  }
+
+ 
+  Ajax.prototype.autoRefresh = function () {
+
+    var $this = $(this)
+    var interval = parseInt($this.attr('data-refresh-interval'), 10)
+
+    Ajax.prototype.refresh.apply($this)
+
+    if(interval){
+        setInterval(function(){
+            Ajax.prototype.refresh.apply($this)
+        }, interval)
+    }
+  }
+ 
   if (typeof Spinner !== 'undefined') { // http://fgnass.github.com/spin.js/
     $.fn.spin = function(opts) {
       this.each(function() {
@@ -184,30 +230,31 @@
         $el.closest(replace_closest_selector).replaceWith(data.html)
       }
       if (replace_inner_selector) {
+        if(replace_inner_selector == '.'){
+          replace_inner_selector = $el
+        }
         $(replace_inner_selector).html(data.html)
       }
       if (replace_closest_inner_selector) {
         $el.closest(replace_closest_inner_selector).html(data.html)
       }
       if (append_selector) {
+        if(append_selector == '.'){
+          append_selector = $el
+        }
         $(append_selector).append(data.html)
       }
       if (prepend_selector) {
+        if(prepend_selector == '.'){
+          prepend_selector = $el
+        }
         $(prepend_selector).prepend(data.html)
       }
       if (refresh_selector) {
-        $.each($(refresh_selector), function(index, value) {
-          $.getJSON($(value).data('refresh-url'), function(data) {
-            $(value).replaceWith(data.html)
-          })
-        })
+          $(refresh_selector).each(Ajax.prototype.refresh)
       }
       if (refresh_closest_selector) {
-        $.each($(refresh_closest_selector), function(index, value) {
-          $.getJSON($(value).data('refresh-url'), function(data) {
-            $el.closest($(value)).replaceWith(data.html)
-          })
-        })
+          $el.closest(refresh_closest_selector).each(Ajax.prototype.refresh)
       }
       if (clear_selector) {
         $(clear_selector).html('')
@@ -250,5 +297,6 @@
     $('body').on('click', 'a.ajax', Ajax.prototype.click)
     $('body').on('submit', 'form.ajax', Ajax.prototype.submit)
     $('body').on('click', 'a[data-cancel-closest]', Ajax.prototype.cancel)
+    $('[data-refresh-interval]').each(Ajax.prototype.autoRefresh)
   })
 }(window.jQuery);
