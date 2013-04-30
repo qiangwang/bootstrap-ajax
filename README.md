@@ -26,11 +26,12 @@ The inclusion of ```spin.min.js``` is optional.
 
 
 ## Actions
-There are currently three actions supported:
+There are currently four actions supported:
 
 1. ```a.click```
 2. ```form.submit```
 3. ```a.cancel```
+4. ```[data-refresh-interval]```
 
 ### ```a.click```
 Binding to the ```a``` tag's click event where the tag has the class ```ajax```:
@@ -70,6 +71,18 @@ the selector defined in the ```data-cancel-closest``` attribute:
 </a>
 ```
 
+### ```[data-refresh-interval]```
+Any tag with ```data-refresh-interval``` attribute defined will refresh automatically.
+This use ```setInterval``` function to call refresh function with ```data-refresh-interval```
+attribute value as the time interval. If ```data-refresh-interval``` is set to ```0```, ```setInterval```
+function will not be called and refresh function will be called only once.
+
+```
+//'.' represent the current element
+<div data-refresh-interval="10000" data-refresh-url="/refresh" data-replace-inner=".">
+    loading...
+</div> 
+```
 
 ## Processing Responses
 There are three data attributes looked for in the response JSON data:
@@ -104,9 +117,9 @@ without a ```location``` directive be processed:
 5. Replace Closest
 
 Here is where it can get fun as all of the values for these processing directives are
-just CSS selectors. In addition they can be multiplexed. You can declare all of them
-at the same time if you so desire. A CSS selector can easily be written to address
-multiple different blocks on the page at the same time.
+just CSS selectors(with one exception that ```.``` represent the current element). 
+In addition they can be multiplexed. You can declare all of them at the same time if you so desire. 
+A CSS selector can easily be written to address multiple different blocks on the page at the same time.
 
 Best to just see some examples.
 
@@ -131,7 +144,7 @@ get refreshed with the contents of the url defined in their ```data-refresh-url`
 attribute:
 
 ```
-<div class="done-score" data-refresh-url="/users/paltman/done-score/">...</div>
+<div class="done-score" data-refresh-url="/users/paltman/done-score/" data-replace=".">...</div>
 
 <div class="done-list">...</div>
 
