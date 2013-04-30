@@ -224,6 +224,9 @@
         , remove_closest_selector = $el.attr('data-remove-closest')
       
       if (replace_selector) {
+        if(replace_selector == '.'){
+          replace_selector = $el
+        }
         $(replace_selector).replaceWith(data.html)
       }
       if (replace_closest_selector) {
